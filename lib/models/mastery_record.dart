@@ -72,11 +72,11 @@ class MasteryRecord {
 
     if (isCorrect) {
       correctStreak++;
-      _checkMasteryAdvance();
     } else {
-      // فشل واحد — لا عقاب، لكن نصفّر الـ streak
       correctStreak = 0;
     }
+    // ✅ FIX: استدعِ دائماً بعد كل محاولة (سواء صح أو خطأ)
+    _checkMasteryAdvance();
   }
 
   /// هل هذه الجلسة انتهت؟ (3 محاولات)

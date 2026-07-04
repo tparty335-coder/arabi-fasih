@@ -89,7 +89,7 @@ class HomeScreen extends StatelessWidget {
                       const SizedBox(height: 24),
 
                       // ===== قائمة كل المهارات =====
-                      _buildSkillsList(mastery),
+                      _buildSkillsList(context, mastery),
                     ],
                   ),
                 );
@@ -326,7 +326,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSkillsList(MasteryService mastery) {
+  Widget _buildSkillsList(BuildContext context, MasteryService mastery) {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -334,9 +334,8 @@ class HomeScreen extends StatelessWidget {
           Text(
             'مسار المهارات',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
+              color: Colors.white.withValues(alpha: 0.8),
+              fontSize: 16, fontWeight: FontWeight.w700,
               fontFamily: AdventureSkin.arabicFont,
             ),
           ),
@@ -347,7 +346,13 @@ class HomeScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 final node = SkillDAG.nodes[index];
                 final record = mastery.getRecord(node.id);
-                return _buildSkillTile(node, record, index);
+                // تحقق من المتطلبات بشكل صحيح
+                final isLocked = node.prerequisites.any((prereqId) {
+                  final prereq = mastery.getRecord(prereqId);
+                  return prereq.status == NodeStatus.unseen ||
+                         prereq.status == NodeStatus.learning;
+                });
+                return _buildSkillTile(context, node, record, index, isLocked);
               },
             ),
           ),
@@ -356,97 +361,68 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSkillTile(SkillNode node, dynamic record, int index) {
+  Widget _buildSkillTile(BuildContext context, SkillNode node, dynamic record, int index, bool isLocked) {
     final status = record.status as NodeStatus;
-    final isLocked = node.prerequisites.isNotEmpty &&
-        !node.prerequisites.every((id) {
-          // سيتحقق المشروع من هذا لاحقاً
-          return true;
-        });
 
     Color statusColor;
     String statusEmoji;
 
     switch (status) {
       case NodeStatus.masteredFinal:
-        statusColor = AdventureSkin.success;
-        statusEmoji = '✅';
-        break;
+        statusColor = AdventureSkin.success; statusEmoji = '✅'; break;
       case NodeStatus.masteredTemp:
       case NodeStatus.review1:
       case NodeStatus.review2:
-        statusColor = AdventureSkin.accent;
-        statusEmoji = '⏰';
-        break;
+        statusColor = AdventureSkin.accent; statusEmoji = '⏰'; break;
       case NodeStatus.learning:
-        statusColor = AdventureSkin.primary;
-        statusEmoji = '🎮';
-        break;
+        statusColor = AdventureSkin.primary; statusEmoji = '🎮'; break;
       default:
-        statusColor = Colors.white30;
-        statusEmoji = '🔒';
+        statusColor = isLocked ? Colors.white24 : Colors.white54;
+        statusEmoji = isLocked ? '🔒' : '▶️';
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: AdventureSkin.cardBg.withOpacity(0.6),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: statusColor.withOpacity(0.3)),
-      ),
-      child: Row(
-        children: [
-          // رقم العقدة
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.15),
-              shape: BoxShape.circle,
-              border: Border.all(color: statusColor.withOpacity(0.4)),
-            ),
-            child: Center(
-              child: Text(
-                '${index + 1}',
-                style: TextStyle(
-                  color: statusColor,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 14,
-                ),
-              ),
-            ),
+    return GestureDetector(
+      onTap: isLocked ? null : () => _navigateToActivity(context, node),
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 200),
+        opacity: isLocked ? 0.4 : 1.0,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: AdventureSkin.cardBg.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: statusColor.withValues(alpha: 0.3)),
           ),
-          const SizedBox(width: 12),
-
-          // العنوان
-          Expanded(
-            child: Column(
+          child: Row(children: [
+            Container(
+              width: 36, height: 36,
+              decoration: BoxDecoration(
+                color: statusColor.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+                border: Border.all(color: statusColor.withValues(alpha: 0.4)),
+              ),
+              child: Center(child: Text(node.letter,
+                  style: TextStyle(color: statusColor,
+                      fontWeight: FontWeight.w900, fontSize: 18,
+                      fontFamily: AdventureSkin.arabicFont))),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  _nodeTitle(node.type),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    fontFamily: AdventureSkin.arabicFont,
-                  ),
-                ),
-                Text(
-                  _nodeDescription(node.type),
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
-                    fontSize: 12,
-                    fontFamily: AdventureSkin.arabicFont,
-                  ),
-                ),
+                Text(_nodeTitle(node.type),
+                    style: const TextStyle(color: Colors.white,
+                        fontSize: 14, fontWeight: FontWeight.w700,
+                        fontFamily: AdventureSkin.arabicFont)),
+                Text(_nodeDescription(node.type),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.5),
+                        fontSize: 12, fontFamily: AdventureSkin.arabicFont)),
               ],
-            ),
-          ),
-
-          Text(statusEmoji, style: const TextStyle(fontSize: 20)),
-        ],
+            )),
+            Text(statusEmoji, style: const TextStyle(fontSize: 20)),
+          ]),
+        ),
       ),
     );
   }

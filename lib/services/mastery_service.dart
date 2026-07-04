@@ -76,30 +76,25 @@ class MasteryService extends ChangeNotifier {
   // محرك التعلم — المهارة التالية
   // =============================================
   SkillNode? getNextSkill() {
+    // المرور 1: أولوية للمراجعات المستحقة
     for (final node in SkillDAG.nodes) {
       final record = _records[node.id];
       final status = record?.status ?? NodeStatus.unseen;
-
-      // تحقق من المتطلبات
-      final prereqsMet = node.prerequisites.every((prereqId) {
-        final prereq = _records[prereqId];
-        return prereq?.status == NodeStatus.masteredTemp ||
-            prereq?.status == NodeStatus.review1 ||
-            prereq?.status == NodeStatus.review2 ||
-            prereq?.status == NodeStatus.masteredFinal;
-      });
-
+      final prereqsMet = _prereqsMet(node);
       if (!prereqsMet) continue;
-
-      // أولوية للمراجعات المستحقة
       if ((status == NodeStatus.masteredTemp ||
               status == NodeStatus.review1 ||
               status == NodeStatus.review2) &&
           (record?.isDueForReview ?? false)) {
         return node;
       }
-
-      // مهارة لم تُتقَن بعد
+    }
+    // المرور 2: أول مهارة لم تُتقَن بعد
+    for (final node in SkillDAG.nodes) {
+      final record = _records[node.id];
+      final status = record?.status ?? NodeStatus.unseen;
+      final prereqsMet = _prereqsMet(node);
+      if (!prereqsMet) continue;
       if (status == NodeStatus.unseen || status == NodeStatus.learning) {
         return node;
       }
@@ -107,10 +102,28 @@ class MasteryService extends ChangeNotifier {
     return null;
   }
 
+  bool _prereqsMet(SkillNode node) {
+    return node.prerequisites.every((prereqId) {
+      final prereq = _records[prereqId];
+      // ✅ FIX: masteredTemp كافي لفتح العقدة التالية
+      return prereq != null &&
+          prereq.status != NodeStatus.unseen &&
+          prereq.status != NodeStatus.learning;
+    });
+  }
+
   // =============================================
   // إحصائيات
   // =============================================
   int get totalMastered => _records.values
+      .where((r) =>
+          r.status == NodeStatus.masteredTemp ||
+          r.status == NodeStatus.review1 ||
+          r.status == NodeStatus.review2 ||
+          r.status == NodeStatus.masteredFinal)
+      .length;
+
+  int get totalFullyMastered => _records.values
       .where((r) => r.status == NodeStatus.masteredFinal)
       .length;
 
