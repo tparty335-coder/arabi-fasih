@@ -15,6 +15,8 @@ import 'activity/node03_vowel_fatha_screen.dart';
 import 'activity/node04_positional_screen.dart';
 import 'activity/node05_blending_screen.dart';
 import 'activity/generic_letter_activity.dart';
+import 'progress_screen.dart';
+import 'diagnostic_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -71,7 +73,7 @@ class HomeScreen extends StatelessWidget {
                       const SizedBox(height: 24),
 
                       // ===== الترحيب =====
-                      _buildHeader(mastery),
+                      _buildHeader(context, mastery),
                       const SizedBox(height: 32),
 
                       // ===== شريط التقدم العام =====
@@ -99,7 +101,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(MasteryService mastery) {
+  Widget _buildHeader(BuildContext context, MasteryService mastery) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -107,24 +109,46 @@ class HomeScreen extends StatelessWidget {
           children: [
             const Text('⚡', style: TextStyle(fontSize: 28)),
             const SizedBox(width: 8),
-            Text(
-              'عربي فصيح',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.w900,
-                fontFamily: AdventureSkin.arabicFont,
+            const Text('عربي فصيح', style: TextStyle(
+              color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900,
+              fontFamily: AdventureSkin.arabicFont,
+            )),
+            const Spacer(),
+            // زر التشخيص
+            GestureDetector(
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const DiagnosticScreen())),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AdventureSkin.accent.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Text('🧠', style: TextStyle(fontSize: 18)),
+              ),
+            ),
+            const SizedBox(width: 8),
+            // زر التقدم
+            GestureDetector(
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const ProgressScreen())),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AdventureSkin.primary.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Text('📊', style: TextStyle(fontSize: 18)),
               ),
             ),
           ],
         ),
         const SizedBox(height: 4),
         Text(
-          'حرف الباء — المستوى الأول',
+          'تعلم الحروف العربية الـ 28',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.6),
-            fontSize: 14,
-            fontFamily: AdventureSkin.arabicFont,
+            color: Colors.white.withValues(alpha: 0.6),
+            fontSize: 14, fontFamily: AdventureSkin.arabicFont,
           ),
         ),
       ],
@@ -286,21 +310,16 @@ class HomeScreen extends StatelessWidget {
           Text('🏆', style: TextStyle(fontSize: 48)),
           SizedBox(height: 12),
           Text(
-            'أتقنت كل مهارات حرف الباء!',
+            'أتقنت كل المهارات المتاحة!',
             style: TextStyle(
-              color: AdventureSkin.success,
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
-              fontFamily: AdventureSkin.arabicFont,
+              color: AdventureSkin.success, fontSize: 18,
+              fontWeight: FontWeight.w900, fontFamily: AdventureSkin.arabicFont,
             ),
           ),
           SizedBox(height: 4),
           Text(
-            'ننتظر إضافة حروف جديدة قريباً',
-            style: TextStyle(
-              color: Colors.white54,
-              fontFamily: AdventureSkin.arabicFont,
-            ),
+            'استمر في المراجعة للحفاظ على إتقانك',
+            style: TextStyle(color: Colors.white54, fontFamily: AdventureSkin.arabicFont),
           ),
         ],
       ),
