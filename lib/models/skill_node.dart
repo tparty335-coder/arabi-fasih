@@ -22,6 +22,14 @@ enum NodeType {
   longVowelYa,                   // L3_02: مد الياء (كسرة + ي)
   longVowelWaw,                  // L3_03: مد الواو (ضمة + و)
   longVowelAdvanced,             // L3_04: كلمات متقدمة + جمع التكسير
+  // === Level 4: الحروف المشددة ===
+  shaddaBasic,                   // L4_01: شدة بسيطة (قِطّة، حَبّة)
+  shaddaProfession,              // L4_02: نمط فَعّال (غَفّار، كَذّاب)
+  shaddaComplex,                 // L4_03: كلمات مركبة (مُعَلِّم، سَيّارَة)
+  // === Level 5: التنوين ===
+  tanwinFath,                    // L5_01: تنوين الفتح (ًـ)
+  tanwinKasr,                    // L5_02: تنوين الكسر (ٍـ)
+  tanwinDamm,                    // L5_03: تنوين الضم (ٌـ)
 }
 
 class SkillNode {
@@ -315,6 +323,20 @@ class SkillDAG {
 
     // L3_04: كلمات متقدمة + جمع التكسير: مدارس، مصانع...
     SkillNode(id:'L3_04_adv',type:NodeType.longVowelAdvanced,letter:'المد',sound:'adv',prerequisites:['L3_03_waw'],confusedWith:[]),
+
+    // ===================================================
+    // المستوى الرابع — الحروف المشددة (L3_04 →)
+    // ===================================================
+    SkillNode(id:'L4_01_shadda',type:NodeType.shaddaBasic,letter:'ّ',sound:'shadda-basic',prerequisites:['L3_04_adv'],confusedWith:[]),
+    SkillNode(id:'L4_02_prof',type:NodeType.shaddaProfession,letter:'ّ',sound:'shadda-prof',prerequisites:['L4_01_shadda'],confusedWith:[]),
+    SkillNode(id:'L4_03_complex',type:NodeType.shaddaComplex,letter:'ّ',sound:'shadda-complex',prerequisites:['L4_02_prof'],confusedWith:[]),
+
+    // ===================================================
+    // المستوى الخامس — التنوين (L4_03 →)
+    // ===================================================
+    SkillNode(id:'L5_01_tanwin_fath',type:NodeType.tanwinFath,letter:'ً',sound:'tanwin-fath',prerequisites:['L4_03_complex'],confusedWith:[]),
+    SkillNode(id:'L5_02_tanwin_kasr',type:NodeType.tanwinKasr,letter:'ٍ',sound:'tanwin-kasr',prerequisites:['L5_01_tanwin_fath'],confusedWith:[]),
+    SkillNode(id:'L5_03_tanwin_damm',type:NodeType.tanwinDamm,letter:'ٌ',sound:'tanwin-damm',prerequisites:['L5_02_tanwin_kasr'],confusedWith:[]),
   ];
 
   static SkillNode? getById(String id) {

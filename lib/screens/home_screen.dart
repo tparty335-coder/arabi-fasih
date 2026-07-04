@@ -18,6 +18,7 @@ import 'activity/generic_letter_activity.dart';
 import 'activity/level2_cvc_screen.dart';
 import 'activity/level2_multisyllable_screen.dart';
 import 'activity/level3_long_vowel_screen.dart';
+import 'activity/level45_comparison_screen.dart';
 import 'progress_screen.dart';
 import 'diagnostic_screen.dart';
 
@@ -40,6 +41,12 @@ class HomeScreen extends StatelessWidget {
       case NodeType.longVowelYa:                  return 'مد الياء إِيـ';
       case NodeType.longVowelWaw:                 return 'مد الواو أُوـ';
       case NodeType.longVowelAdvanced:            return 'كلمات متقدمة 🌟';
+      case NodeType.shaddaBasic:                  return 'الشدة ّ — أساسي';
+      case NodeType.shaddaProfession:             return 'الشدة ّ — مهن';
+      case NodeType.shaddaComplex:                return 'الشدة ّ — مركب';
+      case NodeType.tanwinFath:                   return 'تنوين الفتح ًـ';
+      case NodeType.tanwinKasr:                   return 'تنوين الكسر ٍـ';
+      case NodeType.tanwinDamm:                   return 'تنوين الضم ٌـ';
       default:                                    return 'مهارة';
     }
   }
@@ -60,6 +67,12 @@ class HomeScreen extends StatelessWidget {
       case NodeType.longVowelYa:                  return 'فِيل • دِيك • كِتَاب';
       case NodeType.longVowelWaw:                 return 'حُوت • كُوب • نُور';
       case NodeType.longVowelAdvanced:            return 'مدَارِس • مصَانِع • طَوَابِير';
+      case NodeType.shaddaBasic:                  return 'قِطّة • حَبّة • بَطّة';
+      case NodeType.shaddaProfession:             return 'فَتّاح • كَذّاب • نَجّار';
+      case NodeType.shaddaComplex:                return 'مُعَلِّم • سَيّارَة • ثَلّاجَة';
+      case NodeType.tanwinFath:                   return 'بَيْتًا • قَلْبًا • وَرْدًا';
+      case NodeType.tanwinKasr:                   return 'بَيْتٍ • قَلْبٍ • رَجُلٍ';
+      case NodeType.tanwinDamm:                   return 'بَيْتٌ • قَلْبٌ • رَجُلٌ';
       default:                                    return '';
     }
   }
@@ -456,6 +469,13 @@ class HomeScreen extends StatelessWidget {
         node.type == NodeType.longVowelWaw ||
         node.type == NodeType.longVowelAdvanced) {
       screen = Level3LongVowelScreen(node: node);
+    } else if (node.type == NodeType.shaddaBasic ||
+        node.type == NodeType.shaddaProfession ||
+        node.type == NodeType.shaddaComplex ||
+        node.type == NodeType.tanwinFath ||
+        node.type == NodeType.tanwinKasr ||
+        node.type == NodeType.tanwinDamm) {
+      screen = Level45ComparisonScreen(node: node);
     } else if (node.letter == 'ب') {
       // حرف الباء — الشاشات المخصصة (MVP)
       switch (node.type) {
