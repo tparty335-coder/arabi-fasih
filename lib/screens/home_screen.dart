@@ -9,6 +9,10 @@ import '../models/skill_node.dart';
 import '../services/mastery_service.dart';
 import '../theme/adventure_skin.dart';
 import 'activity/node01_phoneme_screen.dart';
+import 'activity/node02_grapheme_screen.dart';
+import 'activity/node03_vowel_fatha_screen.dart';
+import 'activity/node04_positional_screen.dart';
+import 'activity/node05_blending_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -427,11 +431,26 @@ class HomeScreen extends StatelessWidget {
   }
 
   void _navigateToActivity(BuildContext context, SkillNode node) {
-    // الآن فقط نطلق NODE_01 — باقي العقد لاحقاً
+    Widget screen;
+    switch (node.type) {
+      case NodeType.abstractPhonemeDicrimination:
+        screen = Node01PhonemeScreen(node: node);
+        break;
+      case NodeType.graphemePhonemeMapping:
+        screen = Node02GraphemeScreen(node: node);
+        break;
+      case NodeType.shortVowelFatha:
+        screen = Node03VowelFathaScreen(node: node);
+        break;
+      case NodeType.positionalFormInitial:
+        screen = Node04PositionalScreen(node: node);
+        break;
+      case NodeType.binaryBlending:
+        screen = Node05BlendingScreen(node: node);
+        break;
+    }
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => Node01PhonemeScreen(node: node),
-      ),
+      MaterialPageRoute(builder: (_) => screen),
     );
   }
 }
