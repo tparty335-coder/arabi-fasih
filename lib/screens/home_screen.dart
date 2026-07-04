@@ -5,6 +5,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../data/letters_content.dart';
 import '../models/skill_node.dart';
 import '../services/mastery_service.dart';
 import '../theme/adventure_skin.dart';
@@ -13,6 +14,7 @@ import 'activity/node02_grapheme_screen.dart';
 import 'activity/node03_vowel_fatha_screen.dart';
 import 'activity/node04_positional_screen.dart';
 import 'activity/node05_blending_screen.dart';
+import 'activity/generic_letter_activity.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -432,25 +434,46 @@ class HomeScreen extends StatelessWidget {
 
   void _navigateToActivity(BuildContext context, SkillNode node) {
     Widget screen;
-    switch (node.type) {
-      case NodeType.abstractPhonemeDicrimination:
-        screen = Node01PhonemeScreen(node: node);
-        break;
-      case NodeType.graphemePhonemeMapping:
-        screen = Node02GraphemeScreen(node: node);
-        break;
-      case NodeType.shortVowelFatha:
-        screen = Node03VowelFathaScreen(node: node);
-        break;
-      case NodeType.positionalFormInitial:
-        screen = Node04PositionalScreen(node: node);
-        break;
-      case NodeType.binaryBlending:
-        screen = Node05BlendingScreen(node: node);
-        break;
+
+    // حرف الباء — الشاشات المخصصة (MVP)
+    if (node.letter == 'ب') {
+      switch (node.type) {
+        case NodeType.abstractPhonemeDicrimination:
+          screen = Node01PhonemeScreen(node: node); break;
+        case NodeType.graphemePhonemeMapping:
+          screen = Node02GraphemeScreen(node: node); break;
+        case NodeType.shortVowelFatha:
+          screen = Node03VowelFathaScreen(node: node); break;
+        case NodeType.positionalFormInitial:
+          screen = Node04PositionalScreen(node: node); break;
+        case NodeType.binaryBlending:
+          screen = Node05BlendingScreen(node: node); break;
+      }
+    } else {
+      // باقي الحروف — الشاشة العامة + TTS
+      final letterData = ArabicLettersDB.get(node.letter) ??
+          ArabicLettersDB.get('ب')!;
+      final actType = _nodeTypeToActivity(node.type);
+      screen = GenericLetterActivity(
+        node: node,
+        letterData: letterData,
+        activityType: actType,
+        title: '${node.letter} — ${_nodeTitle(node.type)}',
+      );
     }
+
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => screen),
     );
+  }
+
+  ActivityType _nodeTypeToActivity(NodeType type) {
+    switch (type) {
+      case NodeType.abstractPhonemeDicrimination: return ActivityType.phonemeYesNo;
+      case NodeType.graphemePhonemeMapping:        return ActivityType.pickLetter;
+      case NodeType.shortVowelFatha:               return ActivityType.pickVowel;
+      case NodeType.positionalFormInitial:          return ActivityType.pickWordWithLetter;
+      case NodeType.binaryBlending:                return ActivityType.blending;
+    }
   }
 }

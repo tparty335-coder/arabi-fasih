@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'services/mastery_service.dart';
+import 'services/tts_service.dart';
 import 'theme/adventure_skin.dart';
 import 'screens/home_screen.dart';
 
@@ -25,6 +26,9 @@ void main() async {
   // تهيئة خدمة الإتقان
   final masteryService = MasteryService();
   await masteryService.initialize();
+
+  // تهيئة خدمة الصوت
+  await TtsService().initialize();
 
   runApp(
     ChangeNotifierProvider.value(

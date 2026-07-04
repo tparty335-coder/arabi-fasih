@@ -76,6 +76,50 @@ class SkillDAG {
       prerequisites: ['NODE_04_baa'],
       confusedWith: ['دَا', 'مَا'],
     ),
+
+    // =========================================
+    // حرف التاء — يُفتح بعد إتقان الباء
+    // =========================================
+    SkillNode(
+      id: 'NODE_01_taa',
+      type: NodeType.abstractPhonemeDicrimination,
+      letter: 'ت',
+      sound: '/t/',
+      prerequisites: ['NODE_05_baa'], // يُفتح بعد إتقان الباء
+      confusedWith: ['د', 'ك'],
+    ),
+    SkillNode(
+      id: 'NODE_02_taa',
+      type: NodeType.graphemePhonemeMapping,
+      letter: 'ت',
+      sound: '/t/',
+      prerequisites: ['NODE_01_taa'],
+      confusedWith: ['ب', 'ث'],
+    ),
+    SkillNode(
+      id: 'NODE_03_taa',
+      type: NodeType.shortVowelFatha,
+      letter: 'ت',
+      sound: '/ta/',
+      prerequisites: ['NODE_02_taa'],
+      confusedWith: ['بَ', 'ثَ'],
+    ),
+    SkillNode(
+      id: 'NODE_04_taa',
+      type: NodeType.positionalFormInitial,
+      letter: 'ت',
+      sound: '/t/',
+      prerequisites: ['NODE_03_taa'],
+      confusedWith: ['بـ', 'ثـ'],
+    ),
+    SkillNode(
+      id: 'NODE_05_taa',
+      type: NodeType.binaryBlending,
+      letter: 'ت',
+      sound: '/taa/',
+      prerequisites: ['NODE_04_taa'],
+      confusedWith: ['دَا', 'رَا'],
+    ),
   ];
 
   static SkillNode? getById(String id) {
