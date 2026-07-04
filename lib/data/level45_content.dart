@@ -145,32 +145,64 @@ class L5DB {
   // كلمات بتنوين الكسر (ٍ)
   // =============================================
   static const List<TanwinWord> kasrTanwin = [
-    TanwinWord('قَلْبٍ','قَلْب','❤️','kasr'),
+    TanwinWord('يَوْمٍ','يَوْم','📅','kasr'),
+    TanwinWord('زَيْتٍ','زَيْت','🫒','kasr'),
+    TanwinWord('حَرْفٍ','حَرْف','🔤','kasr'),
+    TanwinWord('زَوْجٍ','زَوْج','👫','kasr'),
+    TanwinWord('نَخْلٍ','نَخْل','🌴','kasr'),
+    TanwinWord('سَيْفٍ','سَيْف','⚔️','kasr'),
+    TanwinWord('جِسْمٍ','جِسْم','🦴','kasr'),
+    TanwinWord('صَوْتٍ','صَوْت','🔊','kasr'),
+    TanwinWord('حَرْبٍ','حَرْب','⚔️','kasr'),
+    TanwinWord('شَمْسٍ','شَمْس','☀️','kasr'),
+    TanwinWord('شَعْرٍ','شَعْر','🧣','kasr'),
+    TanwinWord('ثَوْبٍ','ثَوْب','👘','kasr'),
+    TanwinWord('شَهْرٍ','شَهْر','📅','kasr'),
+    TanwinWord('رَمْلٍ','رَمْل','🏖️','kasr'),
     TanwinWord('بَيْتٍ','بَيْت','🏠','kasr'),
-    TanwinWord('رَجُلٍ','رَجُل','👤','kasr'),
     TanwinWord('كِتَابٍ','كِتَاب','📖','kasr'),
+    TanwinWord('عِلْمٍ','عِلْم','💡','kasr'),
+    TanwinWord('عَذَابٍ','عَذَاب','⚠️','kasr'),
+    TanwinWord('رَجُلٍ','رَجُل','👤','kasr'),
     TanwinWord('نَهْرٍ','نَهْر','🌊','kasr'),
     TanwinWord('وَلَدٍ','وَلَد','👦','kasr'),
     TanwinWord('جَمَلٍ','جَمَل','🐪','kasr'),
-    TanwinWord('شَجَرَةٍ','شَجَرَة','🌳','kasr'),
   ];
 
-  // =============================================
-  // كلمات بتنوين الضم (ٌ)
-  // =============================================
   static const List<TanwinWord> dammTanwin = [
     TanwinWord('قَلْبٌ','قَلْب','❤️','damm'),
     TanwinWord('بَيْتٌ','بَيْت','🏠','damm'),
-    TanwinWord('رَجُلٌ','رَجُل','👤','damm'),
-    TanwinWord('كِتَابٌ','كِتَاب','📖','damm'),
+    TanwinWord('تَمْرٌ','تَمْر','🌴','damm'),
+    TanwinWord('لَوْنٌ','لَوْن','🎨','damm'),
+    TanwinWord('أَرْضٌ','أَرْض','🌍','damm'),
+    TanwinWord('مَوْجٌ','مَوْج','🌊','damm'),
     TanwinWord('نَهْرٌ','نَهْر','🌊','damm'),
-    TanwinWord('وَلَدٌ','وَلَد','👦','damm'),
-    TanwinWord('جَمَلٌ','جَمَل','🐪','damm'),
+    TanwinWord('دَمْعٌ','دَمْع','😢','damm'),
+    TanwinWord('وَرْدٌ','وَرْد','🌹','damm'),
     TanwinWord('قَمَرٌ','قَمَر','🌙','damm'),
     TanwinWord('شَجَرَةٌ','شَجَرَة','🌳','damm'),
     TanwinWord('مَدْرَسَةٌ','مَدْرَسَة','🏫','damm'),
     TanwinWord('سَيَّارَةٌ','سَيَّارَة','🚗','damm'),
     TanwinWord('أَرْنَبٌ','أَرْنَب','🐇','damm'),
+    TanwinWord('قَلَمٌ','قَلَم','✏️','damm'),
+    TanwinWord('كِتَابٌ','كِتَاب','📖','damm'),
+    TanwinWord('عِلْمٌ','عِلْم','💡','damm'),
+    TanwinWord('بَابٌ','بَاب','🚪','damm'),
+    TanwinWord('حَدِيثٌ','حَدِيث','💬','damm'),
+    TanwinWord('وَقْتٌ','وَقْت','⏰','damm'),
+    TanwinWord('فَرَحٌ','فَرَح','😊','damm'),
+    TanwinWord('نَمْلٌ','نَمْل','🐜','damm'),
+  ];
+
+  // =============================================
+  // أزواج متشابهة (درس تمييزي مهم) — صفحة 27
+  // =============================================
+  static const List<List<String>> minimalPairs = [
+    ['عِلْمٌ', 'عَلَمٌ'],    // علم (knowledge) vs علم (flag)
+    ['مَلِكٌ', 'مَلَكٌ'],    // ملك (king) vs ملك (angel)
+    ['سِنَةٌ', 'سَنَةٌ'],    // سنة (doze) vs سنة (year)
+    ['أَلْفٌ', 'أَلِفَ'],     // ألف (thousand) vs ألف (he liked)
+    ['عَالِمٌ', 'عَالَمٌ'],  // عالم (scholar) vs عالم (world)
   ];
 
   static List<TanwinWord> byType(String type) {
