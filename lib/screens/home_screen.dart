@@ -17,6 +17,7 @@ import 'activity/node05_blending_screen.dart';
 import 'activity/generic_letter_activity.dart';
 import 'activity/level2_cvc_screen.dart';
 import 'activity/level2_multisyllable_screen.dart';
+import 'activity/level3_long_vowel_screen.dart';
 import 'progress_screen.dart';
 import 'diagnostic_screen.dart';
 
@@ -35,6 +36,11 @@ class HomeScreen extends StatelessWidget {
       case NodeType.sukunCvcKasra:                return 'الساكن + كسر 🔓';
       case NodeType.multiSyllable:                return 'تقطيع الكلمات 📚';
       case NodeType.verbConjugation:              return 'تصريف الفعل 🌱';
+      case NodeType.longVowelAlif:                return 'مد الألف اآا';
+      case NodeType.longVowelYa:                  return 'مد الياء إِيـ';
+      case NodeType.longVowelWaw:                 return 'مد الواو أُوـ';
+      case NodeType.longVowelAdvanced:            return 'كلمات متقدمة 🌟';
+      default:                                    return 'مهارة';
     }
   }
 
@@ -50,6 +56,11 @@ class HomeScreen extends StatelessWidget {
       case NodeType.sukunCvcKasra:                return 'بِنْت • طِفْل • مِلْح';
       case NodeType.multiSyllable:                return 'مَدْرَسَة • أَرْنَب • شَمْعَة';
       case NodeType.verbConjugation:              return 'أَكْتُب • نَكْتُب • يَكْتُب';
+      case NodeType.longVowelAlif:                return 'بَاب • تَاج • نَار';
+      case NodeType.longVowelYa:                  return 'فِيل • دِيك • كِتَاب';
+      case NodeType.longVowelWaw:                 return 'حُوت • كُوب • نُور';
+      case NodeType.longVowelAdvanced:            return 'مدَارِس • مصَانِع • طَوَابِير';
+      default:                                    return '';
     }
   }
 
@@ -440,6 +451,11 @@ class HomeScreen extends StatelessWidget {
     } else if (node.type == NodeType.multiSyllable ||
         node.type == NodeType.verbConjugation) {
       screen = Level2MultiSyllableScreen(node: node);
+    } else if (node.type == NodeType.longVowelAlif ||
+        node.type == NodeType.longVowelYa ||
+        node.type == NodeType.longVowelWaw ||
+        node.type == NodeType.longVowelAdvanced) {
+      screen = Level3LongVowelScreen(node: node);
     } else if (node.letter == 'ب') {
       // حرف الباء — الشاشات المخصصة (MVP)
       switch (node.type) {

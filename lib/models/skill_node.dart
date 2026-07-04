@@ -17,6 +17,11 @@ enum NodeType {
   sukunCvcKasra,                 // L2_03: CVC مسبوق بكسر
   multiSyllable,                 // L2_04: كلمات متعددة المقاطع
   verbConjugation,               // L2_05: تصريف الفعل المضارع
+  // === Level 3: الأصوات الطويلة (المدود) ===
+  longVowelAlif,                 // L3_01: مد الألف (فتحة + ا)
+  longVowelYa,                   // L3_02: مد الياء (كسرة + ي)
+  longVowelWaw,                  // L3_03: مد الواو (ضمة + و)
+  longVowelAdvanced,             // L3_04: كلمات متقدمة + جمع التكسير
 }
 
 class SkillNode {
@@ -294,6 +299,22 @@ class SkillDAG {
 
     // L2_05: تصريف الفعل المضارع (أَكْتُب، نَكْتُب...)
     SkillNode(id:'L2_05_verb',type:NodeType.verbConjugation,letter:'◌ْ',sound:'verb',prerequisites:['L2_04_multi'],confusedWith:[]),
+
+    // ===================================================
+    // المستوى الثالث — الأصوات الطويلة (يُفتح بعد L2_05)
+    // ===================================================
+
+    // L3_01: مد الألف (فختح + ا): بَاب، تَاج، نَار...
+    SkillNode(id:'L3_01_alif',type:NodeType.longVowelAlif,letter:'ا',sound:'medd-a',prerequisites:['L2_05_verb'],confusedWith:[]),
+
+    // L3_02: مد الياء (كسرة + ي): فِيل، دِيك، عِيد...
+    SkillNode(id:'L3_02_ya',type:NodeType.longVowelYa,letter:'ي',sound:'medd-i',prerequisites:['L3_01_alif'],confusedWith:[]),
+
+    // L3_03: مد الواو (ضمة + و): حُوت، كُوب، نُور...
+    SkillNode(id:'L3_03_waw',type:NodeType.longVowelWaw,letter:'و',sound:'medd-u',prerequisites:['L3_02_ya'],confusedWith:[]),
+
+    // L3_04: كلمات متقدمة + جمع التكسير: مدارس، مصانع...
+    SkillNode(id:'L3_04_adv',type:NodeType.longVowelAdvanced,letter:'المد',sound:'adv',prerequisites:['L3_03_waw'],confusedWith:[]),
   ];
 
   static SkillNode? getById(String id) {
