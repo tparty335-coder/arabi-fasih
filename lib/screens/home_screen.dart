@@ -15,6 +15,8 @@ import 'activity/node03_vowel_fatha_screen.dart';
 import 'activity/node04_positional_screen.dart';
 import 'activity/node05_blending_screen.dart';
 import 'activity/generic_letter_activity.dart';
+import 'activity/level2_cvc_screen.dart';
+import 'activity/level2_multisyllable_screen.dart';
 import 'progress_screen.dart';
 import 'diagnostic_screen.dart';
 
@@ -23,31 +25,31 @@ class HomeScreen extends StatelessWidget {
 
   String _nodeTitle(NodeType type) {
     switch (type) {
-      case NodeType.abstractPhonemeDicrimination:
-        return 'تمييز الصوت 🔊';
-      case NodeType.graphemePhonemeMapping:
-        return 'الصوت والشكل 👁️';
-      case NodeType.shortVowelFatha:
-        return 'الفتحة بَـ ✨';
-      case NodeType.positionalFormInitial:
-        return 'شكل الاتصال بـ 🔗';
-      case NodeType.binaryBlending:
-        return 'الدمج بَا 🎵';
+      case NodeType.abstractPhonemeDicrimination: return 'تمييز الصوت 🔊';
+      case NodeType.graphemePhonemeMapping:       return 'الصوت والشكل 👁️';
+      case NodeType.shortVowelFatha:              return 'الفتحة بَـ ✨';
+      case NodeType.positionalFormInitial:        return 'شكل الاتصال 🔗';
+      case NodeType.binaryBlending:               return 'الدمج 🎵';
+      case NodeType.sukunCvcFatha:                return 'الساكن + فتح 🔓';
+      case NodeType.sukunCvcDamma:                return 'الساكن + ضم 🔓';
+      case NodeType.sukunCvcKasra:                return 'الساكن + كسر 🔓';
+      case NodeType.multiSyllable:                return 'تقطيع الكلمات 📚';
+      case NodeType.verbConjugation:              return 'تصريف الفعل 🌱';
     }
   }
 
   String _nodeDescription(NodeType type) {
     switch (type) {
-      case NodeType.abstractPhonemeDicrimination:
-        return 'هل تسمع صوت الباء؟';
-      case NodeType.graphemePhonemeMapping:
-        return 'ابحث عن الباء بين الحروف';
-      case NodeType.shortVowelFatha:
-        return 'انطق بَـ بشكل صحيح';
-      case NodeType.positionalFormInitial:
-        return 'الباء تمد يدها في الكلمة';
-      case NodeType.binaryBlending:
-        return 'ادمج الأصوات معاً';
+      case NodeType.abstractPhonemeDicrimination: return 'هل تسمع الصوت؟';
+      case NodeType.graphemePhonemeMapping:       return 'ابحث عن الحرف بين الخيارات';
+      case NodeType.shortVowelFatha:              return 'انطق بَـ بشكل صحيح';
+      case NodeType.positionalFormInitial:        return 'شكل الحرف في الكلمة';
+      case NodeType.binaryBlending:               return 'ادمج الأصوات معاً';
+      case NodeType.sukunCvcFatha:                return 'فَأْس • بَيْت • شَمْس';
+      case NodeType.sukunCvcDamma:                return 'بُرْج • أُخْت • غُرْفَة';
+      case NodeType.sukunCvcKasra:                return 'بِنْت • طِفْل • مِلْح';
+      case NodeType.multiSyllable:                return 'مَدْرَسَة • أَرْنَب • شَمْعَة';
+      case NodeType.verbConjugation:              return 'أَكْتُب • نَكْتُب • يَكْتُب';
     }
   }
 
@@ -430,8 +432,16 @@ class HomeScreen extends StatelessWidget {
   void _navigateToActivity(BuildContext context, SkillNode node) {
     Widget screen;
 
-    // حرف الباء — الشاشات المخصصة (MVP)
-    if (node.letter == 'ب') {
+    // Level 2 nodes
+    if (node.type == NodeType.sukunCvcFatha ||
+        node.type == NodeType.sukunCvcDamma ||
+        node.type == NodeType.sukunCvcKasra) {
+      screen = Level2CvcScreen(node: node);
+    } else if (node.type == NodeType.multiSyllable ||
+        node.type == NodeType.verbConjugation) {
+      screen = Level2MultiSyllableScreen(node: node);
+    } else if (node.letter == 'ب') {
+      // حرف الباء — الشاشات المخصصة (MVP)
       switch (node.type) {
         case NodeType.abstractPhonemeDicrimination:
           screen = Node01PhonemeScreen(node: node); break;
@@ -443,23 +453,19 @@ class HomeScreen extends StatelessWidget {
           screen = Node04PositionalScreen(node: node); break;
         case NodeType.binaryBlending:
           screen = Node05BlendingScreen(node: node); break;
+        default:
+          screen = Node01PhonemeScreen(node: node);
       }
     } else {
-      // باقي الحروف — الشاشة العامة + TTS
-      final letterData = ArabicLettersDB.get(node.letter) ??
-          ArabicLettersDB.get('ب')!;
-      final actType = _nodeTypeToActivity(node.type);
+      final letterData = ArabicLettersDB.get(node.letter) ?? ArabicLettersDB.get('ب')!;
       screen = GenericLetterActivity(
-        node: node,
-        letterData: letterData,
-        activityType: actType,
-        title: '${node.letter} — ${_nodeTitle(node.type)}',
+        node: node, letterData: letterData,
+        activityType: _nodeTypeToActivity(node.type),
+        title: 'حرف ${node.letter} — ${_nodeTitle(node.type)}',
       );
     }
 
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => screen),
-    );
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
   }
 
   ActivityType _nodeTypeToActivity(NodeType type) {
@@ -469,6 +475,8 @@ class HomeScreen extends StatelessWidget {
       case NodeType.shortVowelFatha:               return ActivityType.pickVowel;
       case NodeType.positionalFormInitial:          return ActivityType.pickWordWithLetter;
       case NodeType.binaryBlending:                return ActivityType.blending;
+      // Level 2 — handled separately, but need a default
+      default:                                     return ActivityType.phonemeYesNo;
     }
   }
 }

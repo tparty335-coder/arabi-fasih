@@ -11,6 +11,12 @@ enum NodeType {
   shortVowelFatha,               // NODE_03: الفتحة
   positionalFormInitial,         // NODE_04: شكل الاتصال
   binaryBlending,                // NODE_05: دمج ثنائي
+  // === Level 2: الحرف الساكن ===
+  sukunCvcFatha,                 // L2_01: CVC مسبوق بفتح
+  sukunCvcDamma,                 // L2_02: CVC مسبوق بضم
+  sukunCvcKasra,                 // L2_03: CVC مسبوق بكسر
+  multiSyllable,                 // L2_04: كلمات متعددة المقاطع
+  verbConjugation,               // L2_05: تصريف الفعل المضارع
 }
 
 class SkillNode {
@@ -269,6 +275,25 @@ class SkillDAG {
     SkillNode(id:'NODE_03_ya',type:NodeType.shortVowelFatha,letter:'ي',sound:'/ja/',prerequisites:['NODE_02_ya'],confusedWith:['نَ']),
     SkillNode(id:'NODE_04_ya',type:NodeType.positionalFormInitial,letter:'ي',sound:'/j/',prerequisites:['NODE_03_ya'],confusedWith:['نـ']),
     SkillNode(id:'NODE_05_ya',type:NodeType.binaryBlending,letter:'ي',sound:'/jaa/',prerequisites:['NODE_04_ya'],confusedWith:['نَا','وَا']),
+
+    // ===================================================
+    // المستوى الثاني — الحرف الساكن (يُفتح بعد إتقان ي)
+    // ===================================================
+
+    // L2_01: CVC مسبوق بفتح (فَأْس، بَيْت، شَمْس...)
+    SkillNode(id:'L2_01_cvc_fatha',type:NodeType.sukunCvcFatha,letter:'◌ْ',sound:'CVC-a',prerequisites:['NODE_05_ya'],confusedWith:[]),
+
+    // L2_02: CVC مسبوق بضم (بُرْج، أُخْت...)
+    SkillNode(id:'L2_02_cvc_damma',type:NodeType.sukunCvcDamma,letter:'◌ْ',sound:'CVC-u',prerequisites:['L2_01_cvc_fatha'],confusedWith:[]),
+
+    // L2_03: CVC مسبوق بكسر (بِنْت، طِفْل...)
+    SkillNode(id:'L2_03_cvc_kasra',type:NodeType.sukunCvcKasra,letter:'◌ْ',sound:'CVC-i',prerequisites:['L2_02_cvc_damma'],confusedWith:[]),
+
+    // L2_04: كلمات متعددة المقاطع (مَدْرَسة، أَرْنَب...)
+    SkillNode(id:'L2_04_multi',type:NodeType.multiSyllable,letter:'◌ْ',sound:'multi',prerequisites:['L2_03_cvc_kasra'],confusedWith:[]),
+
+    // L2_05: تصريف الفعل المضارع (أَكْتُب، نَكْتُب...)
+    SkillNode(id:'L2_05_verb',type:NodeType.verbConjugation,letter:'◌ْ',sound:'verb',prerequisites:['L2_04_multi'],confusedWith:[]),
   ];
 
   static SkillNode? getById(String id) {
