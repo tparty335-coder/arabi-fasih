@@ -150,6 +150,18 @@ class MasteryService extends ChangeNotifier {
     }
   }
 
+  Future<void> markAsLearning(String skillId) async {
+    final record = _records[skillId];
+    if (record != null && record.status == NodeStatus.unseen) {
+      record.status = NodeStatus.masteredTemp;
+      record.masteryCount = 1;
+      record.nextReview = DateTime.now().add(MasteryRecord.review1Delay);
+      _records[skillId] = record;
+      await _saveToStorage();
+      notifyListeners();
+    }
+  }
+
   Future<void> resetAll() async {
     _records.clear();
     final prefs = await SharedPreferences.getInstance();
