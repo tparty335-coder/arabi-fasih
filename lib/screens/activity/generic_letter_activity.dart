@@ -1,7 +1,6 @@
 // ====================================================
 // screens/activity/generic_letter_activity.dart
-// شاشة نشاط عامة — تعمل مع أي حرف من الـ DB
-// تستبدل NODE_01-05 بملف واحد قابل للبرمجة
+// شاشة نشاط عامة — تعمل مع أي حرف من الـ DB (آمنة البيانات)
 // ====================================================
 
 import 'package:flutter/material.dart';
@@ -57,9 +56,6 @@ class _GenericLetterActivityState extends State<GenericLetterActivity>
   late AnimationController _feedbackCtrl;
   late Animation<double> _feedbackScale;
 
-  // =============================================
-  // بناء الأسئلة ديناميكياً من بيانات الحرف
-  // =============================================
   late final List<_ActivityQuestion> _questions;
 
   @override
@@ -73,7 +69,6 @@ class _GenericLetterActivityState extends State<GenericLetterActivity>
     );
     _questions = _buildQuestions();
     _stopwatch.start();
-    // انطق السؤال الأول تلقائياً
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _speakCurrentQuestion();
     });
@@ -94,8 +89,30 @@ class _GenericLetterActivityState extends State<GenericLetterActivity>
     }
   }
 
+  // =============================================
+  // خوارزمية استخراج المشتتات الخاطئة بأمان (Data-Safe)
+  // =============================================
+  String _getSafeDistractorLetter(LetterData ld, int index) {
+    if (ld.confusedWith.length > index) {
+      return ld.confusedWith[index];
+    }
+    final allFallback = ArabicLettersDB.allLetters
+        .where((l) => l != ld.letter && !ld.confusedWith.contains(l))
+        .toList();
+    return allFallback.isNotEmpty ? allFallback[index % allFallback.length] : 'م';
+  }
+
+  String _getSafeDistractorSound(LetterData ld, int index) {
+    final dist = _getSafeDistractorLetter(ld, index);
+    return '$distَ';
+  }
+
   List<_ActivityQuestion> _buildQuestions() {
     final ld = widget.letterData;
+    final d1 = _getSafeDistractorLetter(ld, 0);
+    final d2 = _getSafeDistractorLetter(ld, 1);
+    final s1 = _getSafeDistractorSound(ld, 0);
+
     switch (widget.activityType) {
       case ActivityType.phonemeYesNo:
         return [
@@ -103,26 +120,24 @@ class _GenericLetterActivityState extends State<GenericLetterActivity>
             instruction: 'هل تسمع صوت\n/${ld.soundFatha}/\nفي هذه الكلمة؟',
             choices: ['نعم ✅', 'لا ❌'],
             correctAnswer: 'نعم ✅',
-            displayText: ld.fathaWords[0].word,
-            autoSpeakText: ld.fathaWords[0].ttsText,
+            displayText: ld.fathaWords.isNotEmpty ? ld.fathaWords[0].word : ld.name,
+            autoSpeakText: ld.fathaWords.isNotEmpty ? ld.fathaWords[0].ttsText : ld.name,
           ),
           _ActivityQuestion(
             instruction: 'اختر الصوت الصحيح\nلـ ${ld.name}',
-            choices: [ld.soundFatha, ld.confusedWith.isNotEmpty
-                ? '${ld.confusedWith[0]}َ' : 'مَ', 'رَ'],
+            choices: [ld.soundFatha, s1, 'رَ'],
             correctAnswer: ld.soundFatha,
             autoSpeakText: ld.soundFatha,
           ),
           _ActivityQuestion(
             instruction: 'أيّ الكلمات\nتبدأ بصوت /${ld.soundFatha}/؟',
             choices: [
-              ld.fathaWords[0].word,
-              ld.confusedWith.isNotEmpty
-                  ? '${ld.confusedWith[0]}َبَلٌ' : 'قَلَمٌ',
+              ld.fathaWords.isNotEmpty ? ld.fathaWords[0].word : '${ld.letter}َيتٌ',
+              '$d1ََبَلٌ',
               'كِتابٌ',
             ],
-            correctAnswer: ld.fathaWords[0].word,
-            autoSpeakText: ld.fathaWords[0].ttsText,
+            correctAnswer: ld.fathaWords.isNotEmpty ? ld.fathaWords[0].word : '${ld.letter}َيتٌ',
+            autoSpeakText: ld.fathaWords.isNotEmpty ? ld.fathaWords[0].ttsText : ld.name,
           ),
         ];
 
@@ -130,32 +145,20 @@ class _GenericLetterActivityState extends State<GenericLetterActivity>
         return [
           _ActivityQuestion(
             instruction: 'أيّ هذه الحروف\nيمثّل  ${ld.name}  ؟',
-            choices: [
-              ld.letter,
-              ld.confusedWith.isNotEmpty ? ld.confusedWith[0] : 'ر',
-              ld.confusedWith.length > 1 ? ld.confusedWith[1] : 'م',
-            ],
+            choices: [ld.letter, d1, d2],
             correctAnswer: ld.letter,
             autoSpeakText: ld.name,
             isLetterGrid: true,
           ),
           _ActivityQuestion(
             instruction: 'أيّ هذه الحروف\nصوته  ${ld.soundFatha} ؟',
-            choices: [
-              ld.confusedWith.isNotEmpty ? ld.confusedWith[0] : 'ر',
-              ld.letter,
-              ld.confusedWith.length > 1 ? ld.confusedWith[1] : 'م',
-            ],
+            choices: [d1, ld.letter, d2],
             correctAnswer: ld.letter,
             isLetterGrid: true,
           ),
           _ActivityQuestion(
-            instruction: 'أيّ هذه الحروف\nhint: نقطة ${_getDotHint(ld.letter)} تحته',
-            choices: [
-              ld.letter,
-              ld.confusedWith.isNotEmpty ? ld.confusedWith[0] : 'ز',
-              'ر',
-            ],
+            instruction: 'أيّ هذه الحروف\nhint: الشكل الخاص بـ ${ld.name}',
+            choices: [ld.letter, d1, 'ز'],
             correctAnswer: ld.letter,
             isLetterGrid: true,
           ),
@@ -172,8 +175,7 @@ class _GenericLetterActivityState extends State<GenericLetterActivity>
           ),
           _ActivityQuestion(
             instruction: 'ابحث عن\n${ld.soundFatha}\nبين هذه الأصوات',
-            choices: ['${ld.confusedWith.isNotEmpty ? ld.confusedWith[0] : "ر"}َ',
-              ld.soundFatha, ld.soundKasra],
+            choices: [s1, ld.soundFatha, ld.soundKasra],
             correctAnswer: ld.soundFatha,
             isLetterGrid: true,
           ),
@@ -181,45 +183,37 @@ class _GenericLetterActivityState extends State<GenericLetterActivity>
             instruction: 'أيّ الكلمات\nتبدأ بـ ${ld.soundFatha}؟',
             choices: [
               ld.kasraWords.isNotEmpty ? ld.kasraWords[0].word : 'بِئرٌ',
-              ld.fathaWords[0].word,
+              ld.fathaWords.isNotEmpty ? ld.fathaWords[0].word : '${ld.letter}َيتٌ',
               ld.dammaWords.isNotEmpty ? ld.dammaWords[0].word : 'بُرجٌ',
             ],
-            correctAnswer: ld.fathaWords[0].word,
-            autoSpeakText: ld.fathaWords[0].ttsText,
+            correctAnswer: ld.fathaWords.isNotEmpty ? ld.fathaWords[0].word : '${ld.letter}َيتٌ',
+            autoSpeakText: ld.fathaWords.isNotEmpty ? ld.fathaWords[0].ttsText : ld.name,
           ),
         ];
 
       case ActivityType.pickWordWithLetter:
+        final w0 = ld.fathaWords.isNotEmpty ? '${ld.fathaWords[0].word} ${ld.fathaWords[0].emoji}' : '${ld.letter}َيتٌ 🏠';
+        final w1 = ld.fathaWords.length > 1 ? '${ld.fathaWords[1].word} ${ld.fathaWords[1].emoji}' : '${ld.letter}َمرٌ 🌴';
+        final w2 = ld.fathaWords.length > 2 ? '${ld.fathaWords[2].word} ${ld.fathaWords[2].emoji}' : '${ld.letter}َبَلٌ ⛰️';
+
         return [
           _ActivityQuestion(
             instruction: 'أيّ الكلمات\nتبدأ بـ  ${ld.initialForm}  ؟',
-            choices: [
-              '${ld.fathaWords[0].word} ${ld.fathaWords[0].emoji}',
-              '${ld.confusedWith.isNotEmpty ? ld.confusedWith[0] : "ر"}َبيعٌ 🌸',
-              'قَمَرٌ 🌙',
-            ],
-            correctAnswer: '${ld.fathaWords[0].word} ${ld.fathaWords[0].emoji}',
-            autoSpeakText: ld.fathaWords[0].ttsText,
+            choices: [w0, '$d1َبيعٌ 🌸', 'قَمَرٌ 🌙'],
+            correctAnswer: w0,
+            autoSpeakText: ld.fathaWords.isNotEmpty ? ld.fathaWords[0].ttsText : ld.name,
           ),
           _ActivityQuestion(
             instruction: 'أيّ الكلمات\nتبدأ بحرف  ${ld.name}  ؟',
-            choices: [
-              '${ld.fathaWords[1].word} ${ld.fathaWords[1].emoji}',
-              'كِتابٌ 📖',
-              'شَجَرةٌ 🌳',
-            ],
-            correctAnswer: '${ld.fathaWords[1].word} ${ld.fathaWords[1].emoji}',
-            autoSpeakText: ld.fathaWords[1].ttsText,
+            choices: [w1, 'كِتابٌ 📖', 'شَجَرةٌ 🌳'],
+            correctAnswer: w1,
+            autoSpeakText: ld.fathaWords.length > 1 ? ld.fathaWords[1].ttsText : ld.name,
           ),
           _ActivityQuestion(
             instruction: 'اختر كلمة أخرى\nتبدأ بـ  ${ld.name}',
-            choices: [
-              'سَمَكٌ 🐟',
-              '${ld.fathaWords[2].word} ${ld.fathaWords[2].emoji}',
-              'لَبَنٌ 🥛',
-            ],
-            correctAnswer: '${ld.fathaWords[2].word} ${ld.fathaWords[2].emoji}',
-            autoSpeakText: ld.fathaWords[2].ttsText,
+            choices: ['سَمَكٌ 🐟', w2, 'لَبَنٌ 🥛'],
+            correctAnswer: w2,
+            autoSpeakText: ld.fathaWords.length > 2 ? ld.fathaWords[2].ttsText : ld.name,
           ),
         ];
 
@@ -227,8 +221,7 @@ class _GenericLetterActivityState extends State<GenericLetterActivity>
         return [
           _ActivityQuestion(
             instruction: 'ادمج هذين الصوتين\nماذا تسمع؟',
-            choices: ['${ld.soundFatha}ا',
-              '${ld.confusedWith.isNotEmpty ? ld.confusedWith[0] : "د"}َا', 'مَا'],
+            choices: ['${ld.soundFatha}ا', '$d1َا', 'مَا'],
             correctAnswer: '${ld.soundFatha}ا',
             blendPart1: ld.soundFatha,
             blendPart2: 'ا',
@@ -236,36 +229,22 @@ class _GenericLetterActivityState extends State<GenericLetterActivity>
           ),
           _ActivityQuestion(
             instruction: 'أيّ المقاطع\nيُنطق  "${ld.soundFatha}ا" ؟',
-            choices: [
-              '${ld.confusedWith.isNotEmpty ? ld.confusedWith[0] : "ر"}َا',
-              '${ld.soundFatha}ا',
-              '${ld.confusedWith.length > 1 ? ld.confusedWith[1] : "م"}َا',
-            ],
+            choices: ['$d1َا', '${ld.soundFatha}ا', '$d2َا'],
             correctAnswer: '${ld.soundFatha}ا',
             isLetterGrid: true,
           ),
           _ActivityQuestion(
             instruction: 'أيّ الكلمات\nتبدأ بمقطع  ${ld.soundFatha}ا ؟',
             choices: [
-              '${ld.fathaWords[0].word} ${ld.fathaWords[0].emoji}',
+              ld.fathaWords.isNotEmpty ? '${ld.fathaWords[0].word} ${ld.fathaWords[0].emoji}' : '${ld.letter}َابٌ 🚪',
               'دَارٌ 🏠',
               'مَاءٌ 💧',
             ],
-            correctAnswer: '${ld.fathaWords[0].word} ${ld.fathaWords[0].emoji}',
-            autoSpeakText: ld.fathaWords[0].ttsText,
+            correctAnswer: ld.fathaWords.isNotEmpty ? '${ld.fathaWords[0].word} ${ld.fathaWords[0].emoji}' : '${ld.letter}َابٌ 🚪',
+            autoSpeakText: ld.fathaWords.isNotEmpty ? ld.fathaWords[0].ttsText : ld.name,
           ),
         ];
     }
-  }
-
-  String _getDotHint(String letter) {
-    const dotMap = {
-      'ب': 'واحدة',
-      'ت': 'اثنتان',
-      'ث': 'ثلاث',
-      'ن': 'واحدة',
-    };
-    return dotMap[letter] ?? '';
   }
 
   // =============================================
@@ -281,11 +260,14 @@ class _GenericLetterActivityState extends State<GenericLetterActivity>
     setState(() { _selectedAnswer = answer; _isProcessing = true; });
     _feedbackCtrl.forward(from: 0);
 
-    // انطق الإجابة الصحيحة عند الاختيار
+    // ✅ نأخذ مرجع mastery قبل أي await لتجنب مشكلة BuildContext عبر async
+    final mastery = context.read<MasteryService>();
+
+    // 🔊 تشغيل الصوت البشري الأصلي من الأسطوانة (ممتاز / حاول مرة أخرى)
+    await _tts.playUiSound(isCorrect ? 'correct' : 'wrong');
+
     await _tts.speak(answer.replaceAll(RegExp(r'[✅❌🎯💡🏠🐄🦆🌊👑🌴🍎🐊✏️📖⛰️🦊🐂🍇🐪🥕🌉💂🚪🌳🕳️🌅🗼💰]'), '').trim());
 
-    // حفظ reference للـ service قبل الـ await
-    final mastery = context.read<MasteryService>();
     await mastery.recordAttempt(
       widget.node.id, isCorrect, elapsed,
       wrongChoice: isCorrect ? null : answer,
@@ -299,6 +281,10 @@ class _GenericLetterActivityState extends State<GenericLetterActivity>
       setState(() { _currentStep++; _selectedAnswer = null; _isProcessing = false; });
       _speakCurrentQuestion();
     } else {
+      if (_correctCount == 3) {
+        mastery.unlockBadge('perfect_session');
+      }
+      mastery.addXp(_xpEarned);
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (_) => SessionCompleteScreen(
           skillId: widget.node.id, correctCount: _correctCount,
@@ -307,7 +293,6 @@ class _GenericLetterActivityState extends State<GenericLetterActivity>
       ));
     }
   }
-
 
   @override
   Widget build(BuildContext context) {

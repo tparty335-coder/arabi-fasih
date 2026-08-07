@@ -36,6 +36,8 @@ dependencies:
   shared_preferences: ^2.3.2
   google_fonts: ^6.2.1
   flutter_tts: ^4.2.0
+  audioplayers: ^6.6.0
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:
@@ -47,6 +49,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  archive: ^3.6.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -58,6 +61,65 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  # أصوات الحروف المسجلة احترافياً (Hybrid Audio Engine)
+  assets:
+    - assets/audio/letters/
+    - assets/audio/letters/meem/
+    - assets/audio/letters/meem/bee1/
+    - assets/audio/letters/meem/bee2/
+    - assets/audio/letters/meem/bee3/
+    - assets/audio/letters/meem/bee4/
+    - assets/audio/letters/meem/cir1/
+    - assets/audio/letters/meem/cir2/
+    - assets/audio/letters/meem/cir3/
+    - assets/audio/letters/meem/fish1/
+    - assets/audio/letters/meem/fish2/
+    - assets/audio/letters/meem/fish3/
+    - assets/audio/letters/meem/fish4/
+    - assets/audio/letters/meem/ka1/
+    - assets/audio/letters/meem/ka2/
+    - assets/audio/letters/meem/ka3/
+    - assets/audio/letters/meem/ka4/
+    - assets/audio/letters/meem/mov1/
+    - assets/audio/letters/meem/mov10/
+    - assets/audio/letters/meem/mov11/
+    - assets/audio/letters/meem/mov2/
+    - assets/audio/letters/meem/mov3/
+    - assets/audio/letters/meem/mov4/
+    - assets/audio/letters/meem/mov5/
+    - assets/audio/letters/meem/mov6/
+    - assets/audio/letters/meem/mov7/
+    - assets/audio/letters/meem/mov8/
+    - assets/audio/letters/meem/mov9/
+    - assets/audio/letters/meem/paint1/
+    - assets/audio/letters/meem/paint2/
+    - assets/audio/letters/meem/paint3/
+    - assets/audio/letters/meem/quesall/
+    - assets/audio/letters/meem/start/
+    - assets/audio/letters/meem/sto1/
+    - assets/audio/letters/meem/sto2/
+    - assets/audio/letters/meem/sto3/
+    - assets/audio/letters/meem/sto4/
+    - assets/audio/letters/meem/sto5/
+    - assets/audio/letters/meem/sto6/
+    - assets/audio/letters/meem/stoact1/
+    - assets/audio/letters/meem/stoact2/
+    - assets/audio/letters/meem/stoact3/
+    - assets/audio/letters/meem/stoact4/
+    - assets/audio/letters/meem/stosong/
+    - assets/audio/letters/meem/words1/
+    - assets/audio/letters/meem/words2/
+    - assets/audio/letters/meem/words3/
+    - assets/audio/letters/meem/words4/
+    - assets/audio/letters/meem/write/
+    - assets/audio/letters/meem/write1/
+    - assets/audio/letters/meem/write2/
+    - assets/audio/letters/meem/write3/
+    - assets/audio/letters/meem/write4/
+    - assets/audio/ui/
+    - assets/images/letters/
+    - assets/images/ui/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

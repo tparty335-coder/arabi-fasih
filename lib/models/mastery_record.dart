@@ -3,7 +3,6 @@
 // سجل الإتقان المحلي — يُخزَّن في JSON على الجهاز
 // ====================================================
 
-import 'dart:convert';
 import 'skill_node.dart';
 
 class AttemptRecord {
@@ -79,13 +78,8 @@ class MasteryRecord {
     _checkMasteryAdvance();
   }
 
-  /// هل هذه الجلسة انتهت؟ (3 محاولات)
-  bool get isSessionComplete {
-    // آخر 3 محاولات
-    if (attempts.length < 3) return false;
-    final lastThree = attempts.sublist(attempts.length - 3);
-    return lastThree.every((a) => true); // كل محاولة = تفاعل واحد
-  }
+  /// هل هذه الجلسة انتهت؟ (اكتملت 3 محاولات على الأقل)
+  bool get isSessionComplete => attempts.length >= 3;
 
   /// هل أتقن هذه الجلسة؟ (2 من آخر 3 صح)
   bool get isSessionMastered {

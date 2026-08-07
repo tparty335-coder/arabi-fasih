@@ -5,8 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'services/mastery_service.dart';
 import 'services/tts_service.dart';
 import 'theme/adventure_skin.dart';
-import 'screens/onboarding_screen.dart';
-import 'screens/home_screen.dart';
+import 'screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,7 +46,7 @@ class ArabiFasihApp extends StatelessWidget {
         textDirection: TextDirection.rtl,
         child: child!,
       ),
-      home: isFirstLaunch ? const OnboardingScreen() : const HomeScreen(),
+      home: SplashScreen(isFirstLaunch: isFirstLaunch),
     );
   }
 }

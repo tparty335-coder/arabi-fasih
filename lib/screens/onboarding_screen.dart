@@ -1,7 +1,9 @@
 // screens/onboarding_screen.dart
+// شاشة الانطلاق — تُستخدم user_age فعلياً لتوجيه المستخدم
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/adventure_skin.dart';
+import 'diagnostic_screen.dart';
 import 'home_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -18,9 +20,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('user_age', _selectedAge!);
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-    );
+
+    // ✅ user_age يُستخدم الآن فعلياً:
+    // الأطفال دون 10 سنوات → اختبار تشخيصي لتحديد نقطة البداية
+    // 11+ → ابدأ مباشرة (لديهم خلفية لغوية مسبقة)
+    if (_selectedAge! <= 9) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const DiagnosticScreen()),
+      );
+    } else {
+      // المتقدمون يبدأون من الشاشة الرئيسية مباشرة
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    }
   }
 
   @override
@@ -52,14 +65,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700,
                           color: Colors.white.withValues(alpha: 0.9),
                           fontFamily: AdventureSkin.arabicFont)),
+                  const SizedBox(height: 8),
+                  Text(
+                    'سيساعدنا ذلك في اختيار نقطة البداية المناسبة لك',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.white.withValues(alpha: 0.5),
+                      fontFamily: AdventureSkin.arabicFont,
+                    ),
+                  ),
                   const SizedBox(height: 20),
                   ...[
                     _AgeOption(label: '3 – 6 سنوات 🌟', age: 5,
-                        color: AdventureSkin.success, desc: 'وضع الحضانة'),
+                        color: AdventureSkin.success,
+                        desc: 'اختبار تشخيص سريع 🔍'),
                     _AgeOption(label: '7 – 10 سنوات 🎮', age: 9,
-                        color: AdventureSkin.primary, desc: 'وضع المغامرة'),
+                        color: AdventureSkin.primary,
+                        desc: 'اختبار تشخيص متقدم 🔍'),
                     _AgeOption(label: '11+ سنة ⚡', age: 13,
-                        color: AdventureSkin.secondary, desc: 'وضع السرعة'),
+                        color: AdventureSkin.secondary,
+                        desc: 'ابدأ من الحروف مباشرة ▶️'),
                   ].map((opt) => Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: GestureDetector(

@@ -133,6 +133,79 @@ class MasteryService extends ChangeNotifier {
       totalNodes == 0 ? 0 : totalMastered / totalNodes;
 
   // =============================================
+  // XP + Streak + Badges System
+  // =============================================
+  int _totalXp = 0;
+  int _currentStreak = 0;
+  DateTime? _lastActivityDate;
+  final List<String> _earnedBadges = [];
+
+  int get totalXp => _totalXp;
+  int get currentStreak => _currentStreak;
+  List<String> get earnedBadges => List.unmodifiable(_earnedBadges);
+  int get level => (_totalXp / 500).floor() + 1; // كل 500 XP = مستوى
+
+  static const Map<String, Map<String, dynamic>> badgeDefinitions = {
+    'first_letter': {'name': 'الحرف الأول ✨', 'desc': 'أتقنت أول حرف', 'icon': '⭐'},
+    'five_letters': {'name': 'خمسة حروف 🌟', 'desc': 'أتقنت 5 حروف', 'icon': '🏅'},
+    'ten_letters': {'name': 'عشرة حروف 💫', 'desc': 'أتقنت 10 حروف', 'icon': '🏆'},
+    'all_letters': {'name': 'كل الحروف 👑', 'desc': 'أتقنت 28 حرفاً', 'icon': '👑'},
+    'streak_3': {'name': '3 أيام متتالية 🔥', 'desc': 'تعلمت 3 أيام متواصلة', 'icon': '🔥'},
+    'streak_7': {'name': 'أسبوع كامل 💪', 'desc': 'تعلمت 7 أيام متواصلة', 'icon': '💪'},
+    'speed_demon': {'name': 'سريع البرق ⚡', 'desc': 'أجبت في أقل من 3 ثوانٍ', 'icon': '⚡'},
+    'perfect_session': {'name': 'جلسة مثالية 💯', 'desc': '3/3 إجابات صحيحة', 'icon': '💯'},
+    'level_2': {'name': 'المستوى الثاني 📚', 'desc': 'وصلت للسكون', 'icon': '📚'},
+    'xp_1000': {'name': 'ألف نقطة 🎯', 'desc': 'جمعت 1000 XP', 'icon': '🎯'},
+  };
+
+  Future<void> addXp(int amount) async {
+    _totalXp += amount;
+    _updateStreak();
+    _checkBadges();
+    await _saveToStorage();
+    notifyListeners();
+  }
+
+  void unlockBadge(String badgeKey) {
+    if (badgeDefinitions.containsKey(badgeKey) && !_earnedBadges.contains(badgeKey)) {
+      _earnedBadges.add(badgeKey);
+      _saveToStorage();
+      notifyListeners();
+    }
+  }
+
+  void _checkBadges() {
+    if (totalMastered >= 1 && !_earnedBadges.contains('first_letter')) _earnedBadges.add('first_letter');
+    if (totalMastered >= 5 && !_earnedBadges.contains('five_letters')) _earnedBadges.add('five_letters');
+    if (totalMastered >= 10 && !_earnedBadges.contains('ten_letters')) _earnedBadges.add('ten_letters');
+    if (totalMastered >= 28 && !_earnedBadges.contains('all_letters')) _earnedBadges.add('all_letters');
+    if (_currentStreak >= 3 && !_earnedBadges.contains('streak_3')) _earnedBadges.add('streak_3');
+    if (_currentStreak >= 7 && !_earnedBadges.contains('streak_7')) _earnedBadges.add('streak_7');
+    if (_totalXp >= 1000 && !_earnedBadges.contains('xp_1000')) _earnedBadges.add('xp_1000');
+    final lvl2Record = _records['L2_01_cvc_fatha'];
+    if (lvl2Record != null && lvl2Record.status != NodeStatus.unseen && !_earnedBadges.contains('level_2')) {
+      _earnedBadges.add('level_2');
+    }
+  }
+
+  void _updateStreak() {
+    final today = DateTime.now();
+    if (_lastActivityDate == null) {
+      _currentStreak = 1;
+    } else {
+      final lastDate = DateTime(_lastActivityDate!.year, _lastActivityDate!.month, _lastActivityDate!.day);
+      final currentDate = DateTime(today.year, today.month, today.day);
+      final diff = currentDate.difference(lastDate).inDays;
+      if (diff == 1) {
+        _currentStreak++;
+      } else if (diff > 1) {
+        _currentStreak = 1;
+      }
+    }
+    _lastActivityDate = today;
+  }
+
+  // =============================================
   // حفظ وتحميل
   // =============================================
   Future<void> _saveToStorage() async {
@@ -141,6 +214,10 @@ class MasteryService extends ChangeNotifier {
       final data = jsonEncode({
         'version': 1,
         'records': _records.map((k, v) => MapEntry(k, v.toJson())),
+        'totalXp': _totalXp,
+        'currentStreak': _currentStreak,
+        'lastActivityDate': _lastActivityDate?.toIso8601String(),
+        'earnedBadges': _earnedBadges,
       });
       await prefs.setString(_storageKey, data);
     } catch (e) {
@@ -158,6 +235,15 @@ class MasteryService extends ChangeNotifier {
       records.forEach((k, v) {
         _records[k] = MasteryRecord.fromJson(v as Map<String, dynamic>);
       });
+      _totalXp = (data['totalXp'] as num?)?.toInt() ?? 0;
+      _currentStreak = (data['currentStreak'] as num?)?.toInt() ?? 0;
+      if (data['lastActivityDate'] != null) {
+        _lastActivityDate = DateTime.tryParse(data['lastActivityDate'] as String);
+      }
+      if (data['earnedBadges'] != null) {
+        _earnedBadges.clear();
+        _earnedBadges.addAll((data['earnedBadges'] as List).cast<String>());
+      }
     } catch (e) {
       debugPrint('MasteryService: Error loading — $e');
     }
@@ -177,8 +263,26 @@ class MasteryService extends ChangeNotifier {
 
   Future<void> resetAll() async {
     _records.clear();
+    _totalXp = 0;
+    _currentStreak = 0;
+    _earnedBadges.clear();
+    _lastActivityDate = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_storageKey);
     await initialize();
+  }
+
+  // =============================================
+  // تحديد نقطة الدخول من اختبار التشخيص
+  // يجعل العقدة قابلة للفتح دون منح إتقان حقيقي
+  // =============================================
+  Future<void> setEntryPoint(String skillId) async {
+    final record = _records[skillId];
+    if (record != null && record.status == NodeStatus.unseen) {
+      record.status = NodeStatus.learning; // مفتوح لكن غير مُتقَن
+      _records[skillId] = record;
+      await _saveToStorage();
+      notifyListeners();
+    }
   }
 }

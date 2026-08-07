@@ -83,12 +83,18 @@ class _Level2CvcScreenState extends State<Level2CvcScreen>
 
     if (_step + 1 >= _wordList.length) {
       if (!mounted) return;
+      final mastery = context.read<MasteryService>();
+      final xp = _correct * 20;
+      if (_correct == _wordList.length) {
+        mastery.unlockBadge('perfect_session');
+      }
+      mastery.addXp(xp);
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (_) => SessionCompleteScreen(
           skillId: widget.node.id,
           correctCount: _correct,
           totalSteps: _wordList.length,
-          xpEarned: _correct * 20,
+          xpEarned: xp,
         ),
       ));
     } else {

@@ -109,6 +109,11 @@ class _Node05BlendingScreenState extends State<Node05BlendingScreen>
     if (_currentStep < 3) {
       setState(() { _currentStep++; _selectedAnswer = null; _isProcessing = false; });
     } else {
+      final mastery = context.read<MasteryService>();
+      if (_correctCount == 3) {
+        mastery.unlockBadge('perfect_session');
+      }
+      mastery.addXp(_xpEarned);
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (_) => SessionCompleteScreen(
           skillId: widget.node.id, correctCount: _correctCount,

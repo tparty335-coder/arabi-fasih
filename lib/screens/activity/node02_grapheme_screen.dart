@@ -25,7 +25,6 @@ class _Node02GraphemeScreenState extends State<Node02GraphemeScreen>
   int _currentStep = 1;
   int _xpEarned = 0;
   String? _selectedAnswer;
-  bool? _isAnswerCorrect;
   bool _isProcessing = false;
   int _correctCount = 0;
   final _stopwatch = Stopwatch();
@@ -88,7 +87,6 @@ class _Node02GraphemeScreenState extends State<Node02GraphemeScreen>
 
     setState(() {
       _selectedAnswer = answer;
-      _isAnswerCorrect = isCorrect;
       _isProcessing = true;
     });
 
@@ -111,10 +109,14 @@ class _Node02GraphemeScreenState extends State<Node02GraphemeScreen>
       setState(() {
         _currentStep++;
         _selectedAnswer = null;
-        _isAnswerCorrect = null;
         _isProcessing = false;
       });
     } else {
+      final mastery = context.read<MasteryService>();
+      if (_correctCount == 3) {
+        mastery.unlockBadge('perfect_session');
+      }
+      mastery.addXp(_xpEarned);
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (_) => SessionCompleteScreen(
           skillId: widget.node.id,

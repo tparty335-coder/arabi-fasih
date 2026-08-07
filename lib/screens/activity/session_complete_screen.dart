@@ -6,7 +6,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/mastery_service.dart';
+import '../../services/tts_service.dart';
 import '../../theme/adventure_skin.dart';
+import '../../widgets/reward_animation.dart';
+import '../../widgets/xp_counter.dart';
+import '../../widgets/falcon_mascot.dart';
 
 class SessionCompleteScreen extends StatefulWidget {
   final String skillId;
@@ -49,6 +53,10 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen>
       CurvedAnimation(parent: _controller, curve: Curves.easeIn),
     );
     _controller.forward();
+    // 🔊 صوت الاحتفال من الأسطوانة عند انتهاء الجلسة
+    Future.delayed(const Duration(milliseconds: 300), () {
+      TtsService().playUiSound(_isMastered ? 'complete' : 'wrong');
+    });
   }
 
   @override
@@ -59,62 +67,71 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen>
 
   @override
   Widget build(BuildContext context) {
-    final record = context.read<MasteryService>().getRecord(widget.skillId);
+    final mastery = context.read<MasteryService>();
+    final record = mastery.getRecord(widget.skillId);
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AdventureSkin.backgroundGradient,
-        ),
-        child: SafeArea(
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: FadeTransition(
-              opacity: _fadeAnim,
-              child: Padding(
-                padding: const EdgeInsets.all(28),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // ===== أيقونة النتيجة =====
-                    ScaleTransition(
-                      scale: _scaleAnim,
-                      child: Text(
-                        _isMastered ? '🏆' : '🎮',
-                        style: const TextStyle(fontSize: 80),
+      body: RewardAnimation(
+        trigger: _isMastered,
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: AdventureSkin.backgroundGradient,
+          ),
+          child: SafeArea(
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: FadeTransition(
+                opacity: _fadeAnim,
+                child: Padding(
+                  padding: const EdgeInsets.all(28),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // ===== أيقونة النتيجة والصقر =====
+                      ScaleTransition(
+                        scale: _scaleAnim,
+                        child: FalconMascot(
+                          mood: _isMastered
+                              ? FalconMood.celebrating
+                              : FalconMood.encouraging,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 24),
+                      const SizedBox(height: 16),
 
-                    // ===== رسالة النتيجة =====
-                    Text(
-                      _isMastered
-                          ? 'أحسنتَ! أتقنتَ هذه المهارة! 🔥'
-                          : 'حاول مرة أخرى! 💪',
-                      textAlign: TextAlign.center,
-                      style: AdventureSkin.feedbackStyle.copyWith(
-                        color: _isMastered
-                            ? AdventureSkin.success
-                            : AdventureSkin.accent,
+                      // ===== رسالة النتيجة =====
+                      Text(
+                        _isMastered
+                            ? 'أحسنتَ! أتقنتَ هذه المهارة! 🔥'
+                            : 'حاول مرة أخرى! 💪',
+                        textAlign: TextAlign.center,
+                        style: AdventureSkin.feedbackStyle.copyWith(
+                          color: _isMastered
+                              ? AdventureSkin.success
+                              : AdventureSkin.accent,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                    // ===== النتيجة =====
-                    _buildScoreCard(),
-                    const SizedBox(height: 12),
+                      // ===== النتيجة =====
+                      _buildScoreCard(),
+                      const SizedBox(height: 12),
 
-                    // ===== XP المكتسب =====
-                    _buildXPBadge(),
-                    const SizedBox(height: 32),
+                      // ===== XP المكتسب =====
+                      _buildXPBadge(),
+                      const SizedBox(height: 16),
 
-                    // ===== حالة الإتقان =====
-                    if (_isMastered) _buildMasteryStatus(record),
-                    const SizedBox(height: 32),
+                      // ===== Streak =====
+                      _buildStreakAndBadges(mastery),
+                      const SizedBox(height: 24),
 
-                    // ===== أزرار =====
-                    _buildButtons(context),
-                  ],
+                      // ===== حالة الإتقان =====
+                      if (_isMastered) _buildMasteryStatus(record),
+                      const SizedBox(height: 24),
+
+                      // ===== أزرار =====
+                      _buildButtons(context),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -155,17 +172,45 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen>
   }
 
   Widget _buildXPBadge() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-      decoration: BoxDecoration(
-        color: AdventureSkin.accent.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AdventureSkin.accent.withOpacity(0.5)),
+    return XpCounterAnimation(
+      targetXp: widget.xpEarned,
+      style: const TextStyle(
+        fontSize: 26,
+        fontWeight: FontWeight.w900,
+        color: Color(0xFFFFD700),
+        fontFamily: AdventureSkin.arabicFont,
       ),
-      child: Text(
-        '⚡ +${widget.xpEarned} XP',
-        style: AdventureSkin.xpStyle.copyWith(fontSize: 18),
-      ),
+    );
+  }
+
+  Widget _buildStreakAndBadges(MasteryService mastery) {
+    return Column(
+      children: [
+        if (mastery.currentStreak > 0)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.orange.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.orange.withValues(alpha: 0.4)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('🔥 ', style: TextStyle(fontSize: 16)),
+                Text(
+                  'حافَظتَ على نشاطكَ لـ ${mastery.currentStreak} يوم متتالي!',
+                  style: const TextStyle(
+                    color: Colors.orangeAccent,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    fontFamily: AdventureSkin.arabicFont,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 
@@ -178,15 +223,15 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen>
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AdventureSkin.secondary.withOpacity(0.1),
+        color: AdventureSkin.secondary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AdventureSkin.secondary.withOpacity(0.3)),
+        border: Border.all(color: AdventureSkin.secondary.withValues(alpha: 0.3)),
       ),
       child: Text(
         '⏰ ستظهر لك مراجعة خلال 24 ساعة لتثبيت المهارة',
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: Colors.white.withOpacity(0.7),
+          color: Colors.white.withValues(alpha: 0.7),
           fontFamily: AdventureSkin.arabicFont,
           fontSize: 13,
         ),

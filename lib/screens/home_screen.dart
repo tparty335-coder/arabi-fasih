@@ -15,15 +15,29 @@ import 'activity/node03_vowel_fatha_screen.dart';
 import 'activity/node04_positional_screen.dart';
 import 'activity/node05_blending_screen.dart';
 import 'activity/generic_letter_activity.dart';
+import 'activity/letter_intro_screen.dart';
 import 'activity/level2_cvc_screen.dart';
 import 'activity/level2_multisyllable_screen.dart';
 import 'activity/level3_long_vowel_screen.dart';
 import 'activity/level45_comparison_screen.dart';
+import 'activity/meem_hub_screen.dart';
 import 'progress_screen.dart';
 import 'diagnostic_screen.dart';
+import 'badges_screen.dart';
+import 'parents_screen.dart';
+import '../widgets/falcon_mascot.dart';
+import '../widgets/adventure_path.dart';
+import '../utils/app_images.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'صباح الخير! ☀️';
+    if (hour < 17) return 'مرحباً! 🌤️';
+    return 'مساء الخير! 🌙';
+  }
 
   String _nodeTitle(NodeType type) {
     switch (type) {
@@ -47,7 +61,6 @@ class HomeScreen extends StatelessWidget {
       case NodeType.tanwinFath:                   return 'تنوين الفتح ًـ';
       case NodeType.tanwinKasr:                   return 'تنوين الكسر ٍـ';
       case NodeType.tanwinDamm:                   return 'تنوين الضم ٌـ';
-      default:                                    return 'مهارة';
     }
   }
 
@@ -73,16 +86,25 @@ class HomeScreen extends StatelessWidget {
       case NodeType.tanwinFath:                   return 'بَيْتًا • قَلْبًا • وَرْدًا';
       case NodeType.tanwinKasr:                   return 'بَيْتٍ • قَلْبٍ • رَجُلٍ';
       case NodeType.tanwinDamm:                   return 'بَيْتٌ • قَلْبٌ • رَجُلٌ';
-      default:                                    return '';
     }
+  }
+
+  List<SkillNode> _getVisibleNodes() {
+    // عرض عقد الحروف الـ 28 (Node_01 من كل حرف)
+    return SkillDAG.nodes.where((n) => n.type == NodeType.abstractPhonemeDicrimination).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: AdventureSkin.backgroundGradient,
+          image: DecorationImage(
+            image: const AssetImage(AppImages.desertBg),
+            fit: BoxFit.cover,
+            onError: (_, __) {},
+          ),
         ),
         child: SafeArea(
           child: Directionality(
@@ -90,21 +112,30 @@ class HomeScreen extends StatelessWidget {
             child: Consumer<MasteryService>(
               builder: (context, mastery, _) {
                 final nextNode = mastery.getNextSkill();
+                final visibleNodes = _getVisibleNodes();
 
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
 
                       // ===== الترحيب =====
                       _buildHeader(context, mastery),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 16),
 
-                      // ===== شريط التقدم العام =====
-                      _buildProgressSection(mastery),
-                      const SizedBox(height: 32),
+                      // ===== الصقر الرئاسي (Falcon Mascot) =====
+                      Center(
+                        child: FalconMascot(
+                          mood: mastery.currentStreak >= 3
+                              ? FalconMood.celebrating
+                              : mastery.totalMastered > 0
+                                  ? FalconMood.encouraging
+                                  : FalconMood.happy,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
 
                       // ===== بطاقة المهارة التالية =====
                       if (nextNode != null)
@@ -112,10 +143,16 @@ class HomeScreen extends StatelessWidget {
                       else
                         _buildAllMasteredCard(),
 
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
 
-                      // ===== قائمة كل المهارات =====
-                      _buildSkillsList(context, mastery),
+                      // ===== خريطة مسار المغامرة البصري (Adventure Path Map) =====
+                      Expanded(
+                        child: AdventurePath(
+                          nodes: visibleNodes,
+                          mastery: mastery,
+                          onTap: (node) => _navigateToActivity(context, node),
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -133,13 +170,59 @@ class HomeScreen extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Text('⚡', style: TextStyle(fontSize: 28)),
-            const SizedBox(width: 8),
-            const Text('عربي فصيح', style: TextStyle(
-              color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900,
-              fontFamily: AdventureSkin.arabicFont,
-            )),
+            const Text('⚡', style: TextStyle(fontSize: 24)),
+            const SizedBox(width: 6),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _getGreeting(),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    fontSize: 12,
+                    fontFamily: AdventureSkin.arabicFont,
+                  ),
+                ),
+                const Text(
+                  'عربي فصيح',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                    fontFamily: AdventureSkin.arabicFont,
+                  ),
+                ),
+              ],
+            ),
             const Spacer(),
+            // زر لوحة الوالدين
+            GestureDetector(
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const ParentsScreen())),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Text('👨‍👩‍👧', style: TextStyle(fontSize: 16)),
+              ),
+            ),
+            const SizedBox(width: 6),
+            // زر الأوسمة
+            GestureDetector(
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const BadgesScreen())),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Text('🏅', style: TextStyle(fontSize: 16)),
+              ),
+            ),
+            const SizedBox(width: 6),
             // زر التشخيص
             GestureDetector(
               onTap: () => Navigator.of(context).push(MaterialPageRoute(
@@ -150,10 +233,10 @@ class HomeScreen extends StatelessWidget {
                   color: AdventureSkin.accent.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Text('🧠', style: TextStyle(fontSize: 18)),
+                child: const Text('🧠', style: TextStyle(fontSize: 16)),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 6),
             // زر التقدم
             GestureDetector(
               onTap: () => Navigator.of(context).push(MaterialPageRoute(
@@ -164,69 +247,51 @@ class HomeScreen extends StatelessWidget {
                   color: AdventureSkin.primary.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Text('📊', style: TextStyle(fontSize: 18)),
+                child: const Text('📊', style: TextStyle(fontSize: 16)),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 4),
-        Text(
-          'تعلم الحروف العربية الـ 28',
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.6),
-            fontSize: 14, fontFamily: AdventureSkin.arabicFont,
+        const SizedBox(height: 10),
+
+        // ===== شريط الإحصائيات (XP / Streak / Level / Badges) =====
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: AdventureSkin.cardBg.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildStatChip('⚡', '${mastery.totalXp} XP', Colors.amber),
+              _buildStatChip('🔥', '${mastery.currentStreak} يوم', Colors.orange),
+              _buildStatChip('🏅', '${mastery.earnedBadges.length} وسام', Colors.purpleAccent),
+              _buildStatChip('⭐', 'مستوى ${mastery.level}', AdventureSkin.accent),
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildProgressSection(MasteryService mastery) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: AdventureSkin.cardDecoration,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'تقدمك',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.8),
-                  fontSize: 14,
-                  fontFamily: AdventureSkin.arabicFont,
-                ),
-              ),
-              Text(
-                '${mastery.totalMastered} / ${mastery.totalNodes} مهارة',
-                style: AdventureSkin.xpStyle,
-              ),
-            ],
+  Widget _buildStatChip(String emoji, String text, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(emoji, style: const TextStyle(fontSize: 14)),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: TextStyle(
+            color: color,
+            fontWeight: FontWeight.w800,
+            fontSize: 12,
+            fontFamily: AdventureSkin.arabicFont,
           ),
-          const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              value: mastery.progressPercent,
-              backgroundColor: Colors.white.withOpacity(0.1),
-              valueColor:
-                  const AlwaysStoppedAnimation<Color>(AdventureSkin.success),
-              minHeight: 10,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '${(mastery.progressPercent * 100).toStringAsFixed(0)}% مكتمل',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.5),
-              fontSize: 12,
-              fontFamily: AdventureSkin.arabicFont,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -245,7 +310,7 @@ class HomeScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: AdventureSkin.primary.withOpacity(0.4),
+              color: AdventureSkin.primary.withValues(alpha: 0.4),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -288,7 +353,7 @@ class HomeScreen extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Row(
@@ -326,10 +391,10 @@ class HomeScreen extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AdventureSkin.success.withOpacity(0.1),
+        color: AdventureSkin.success.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
         border:
-            Border.all(color: AdventureSkin.success.withOpacity(0.4), width: 2),
+            Border.all(color: AdventureSkin.success.withValues(alpha: 0.4), width: 2),
       ),
       child: const Column(
         children: [
@@ -348,107 +413,6 @@ class HomeScreen extends StatelessWidget {
             style: TextStyle(color: Colors.white54, fontFamily: AdventureSkin.arabicFont),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSkillsList(BuildContext context, MasteryService mastery) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'مسار المهارات',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.8),
-              fontSize: 16, fontWeight: FontWeight.w700,
-              fontFamily: AdventureSkin.arabicFont,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: ListView.builder(
-              itemCount: SkillDAG.nodes.length,
-              itemBuilder: (context, index) {
-                final node = SkillDAG.nodes[index];
-                final record = mastery.getRecord(node.id);
-                // تحقق من المتطلبات بشكل صحيح
-                final isLocked = node.prerequisites.any((prereqId) {
-                  final prereq = mastery.getRecord(prereqId);
-                  return prereq.status == NodeStatus.unseen ||
-                         prereq.status == NodeStatus.learning;
-                });
-                return _buildSkillTile(context, node, record, index, isLocked);
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSkillTile(BuildContext context, SkillNode node, dynamic record, int index, bool isLocked) {
-    final status = record.status as NodeStatus;
-
-    Color statusColor;
-    String statusEmoji;
-
-    switch (status) {
-      case NodeStatus.masteredFinal:
-        statusColor = AdventureSkin.success; statusEmoji = '✅'; break;
-      case NodeStatus.masteredTemp:
-      case NodeStatus.review1:
-      case NodeStatus.review2:
-        statusColor = AdventureSkin.accent; statusEmoji = '⏰'; break;
-      case NodeStatus.learning:
-        statusColor = AdventureSkin.primary; statusEmoji = '🎮'; break;
-      default:
-        statusColor = isLocked ? Colors.white24 : Colors.white54;
-        statusEmoji = isLocked ? '🔒' : '▶️';
-    }
-
-    return GestureDetector(
-      onTap: isLocked ? null : () => _navigateToActivity(context, node),
-      child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 200),
-        opacity: isLocked ? 0.4 : 1.0,
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: AdventureSkin.cardBg.withValues(alpha: 0.6),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: statusColor.withValues(alpha: 0.3)),
-          ),
-          child: Row(children: [
-            Container(
-              width: 36, height: 36,
-              decoration: BoxDecoration(
-                color: statusColor.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-                border: Border.all(color: statusColor.withValues(alpha: 0.4)),
-              ),
-              child: Center(child: Text(node.letter,
-                  style: TextStyle(color: statusColor,
-                      fontWeight: FontWeight.w900, fontSize: 18,
-                      fontFamily: AdventureSkin.arabicFont))),
-            ),
-            const SizedBox(width: 12),
-            Expanded(child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(_nodeTitle(node.type),
-                    style: const TextStyle(color: Colors.white,
-                        fontSize: 14, fontWeight: FontWeight.w700,
-                        fontFamily: AdventureSkin.arabicFont)),
-                Text(_nodeDescription(node.type),
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.5),
-                        fontSize: 12, fontFamily: AdventureSkin.arabicFont)),
-              ],
-            )),
-            Text(statusEmoji, style: const TextStyle(fontSize: 20)),
-          ]),
-        ),
       ),
     );
   }
@@ -492,12 +456,26 @@ class HomeScreen extends StatelessWidget {
         default:
           screen = Node01PhonemeScreen(node: node);
       }
+    } else if (node.letter == 'م') {
+      // حرف الميم — بوابة التجربة الكاملة بصوت بشري أصلي
+      screen = const MeemHubScreen();
     } else {
-      final letterData = ArabicLettersDB.get(node.letter) ?? ArabicLettersDB.get('ب')!;
-      screen = GenericLetterActivity(
+      // جميع الحروف الأخرى — GenericLetterActivity مسبوقة بشاشة التعليم
+      final letterData = ArabicLettersDB.get(node.letter);
+      if (letterData == null) {
+        debugPrint('HomeScreen: No LetterData found for "${node.letter}" — skipping navigation.');
+        return;
+      }
+      final activityScreen = GenericLetterActivity(
         node: node, letterData: letterData,
         activityType: _nodeTypeToActivity(node.type),
         title: 'حرف ${node.letter} — ${_nodeTitle(node.type)}',
+      );
+      // ✅ التسلسل التربوي الصحيح: عرض الحرف أولاً ثم الاختبار
+      screen = LetterIntroScreen(
+        node: node,
+        letterData: letterData,
+        nextScreen: activityScreen,
       );
     }
 

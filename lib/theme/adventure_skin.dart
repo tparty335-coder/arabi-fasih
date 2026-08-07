@@ -108,10 +108,10 @@ class AdventureSkin {
   static BoxDecoration get cardDecoration => BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: secondary.withOpacity(0.3), width: 1.5),
+        border: Border.all(color: secondary.withValues(alpha: 0.3), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: secondary.withOpacity(0.2),
+            color: secondary.withValues(alpha: 0.2),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -121,16 +121,16 @@ class AdventureSkin {
   static BoxDecoration get letterCardDecoration => BoxDecoration(
         color: letterCard,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: secondary.withOpacity(0.4), width: 2),
+        border: Border.all(color: secondary.withValues(alpha: 0.4), width: 2),
       );
 
   static BoxDecoration letterCardCorrectDecoration = BoxDecoration(
-        color: letterCardCorrect.withOpacity(0.2),
+        color: letterCardCorrect.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: letterCardCorrect, width: 2.5),
         boxShadow: [
           BoxShadow(
-            color: letterCardCorrect.withOpacity(0.4),
+            color: letterCardCorrect.withValues(alpha: 0.4),
             blurRadius: 16,
             spreadRadius: 2,
           ),
@@ -138,7 +138,7 @@ class AdventureSkin {
       );
 
   static BoxDecoration letterCardWrongDecoration = BoxDecoration(
-        color: letterCardWrong.withOpacity(0.2),
+        color: letterCardWrong.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: letterCardWrong, width: 2.5),
       );

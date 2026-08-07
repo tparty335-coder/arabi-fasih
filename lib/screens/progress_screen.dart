@@ -78,8 +78,11 @@ class ProgressScreen extends StatelessWidget {
     final progress = mastered / nodes.length;
 
     Color borderColor = Colors.white12;
-    if (mastered == nodes.length) borderColor = AdventureSkin.success;
-    else if (inProgress > 0) borderColor = AdventureSkin.primary;
+    if (mastered == nodes.length) {
+      borderColor = AdventureSkin.success;
+    } else if (inProgress > 0) {
+      borderColor = AdventureSkin.primary;
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),

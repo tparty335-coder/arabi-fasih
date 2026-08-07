@@ -205,9 +205,9 @@ class L3DB {
 
   static List<LongVowelWord> wordsByType(String type) {
     switch (type) {
-      case 'alif': return [...alifWords, ...twoSyllableWords.where((w) => w.vowelType == 'alif').toList()];
-      case 'ya':   return [...yaWords,   ...twoSyllableWords.where((w) => w.vowelType == 'ya').toList()];
-      case 'waw':  return [...wawWords,  ...twoSyllableWords.where((w) => w.vowelType == 'waw').toList()];
+      case 'alif': return [...alifWords, ...twoSyllableWords.where((w) => w.vowelType == 'alif')];
+      case 'ya':   return [...yaWords,   ...twoSyllableWords.where((w) => w.vowelType == 'ya')];
+      case 'waw':  return [...wawWords,  ...twoSyllableWords.where((w) => w.vowelType == 'waw')];
       default:     return allWords();
     }
   }

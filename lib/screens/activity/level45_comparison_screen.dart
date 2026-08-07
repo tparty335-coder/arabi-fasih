@@ -135,12 +135,18 @@ class _Level45ComparisonScreenState
 
     if (_step + 1 >= _items.length) {
       if (!mounted) return;
+      final mastery = context.read<MasteryService>();
+      final xp = _correct * 20;
+      if (_correct == _items.length) {
+        mastery.unlockBadge('perfect_session');
+      }
+      mastery.addXp(xp);
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (_) => SessionCompleteScreen(
           skillId: widget.node.id,
           correctCount: _correct,
           totalSteps: _items.length,
-          xpEarned: _correct * 20,
+          xpEarned: xp,
         ),
       ));
     } else {

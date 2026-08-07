@@ -117,12 +117,18 @@ class _Level3LongVowelScreenState extends State<Level3LongVowelScreen>
 
     if (_step + 1 >= _words.length) {
       if (!mounted) return;
+      final mastery = context.read<MasteryService>();
+      final xp = _correct * 20;
+      if (_correct == _words.length) {
+        mastery.unlockBadge('perfect_session');
+      }
+      mastery.addXp(xp);
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (_) => SessionCompleteScreen(
           skillId: widget.node.id,
           correctCount: _correct,
           totalSteps: _words.length,
-          xpEarned: _correct * 20,
+          xpEarned: xp,
         ),
       ));
     } else {

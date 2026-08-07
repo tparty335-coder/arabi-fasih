@@ -27,7 +27,6 @@ class _Node01PhonemeScreenState extends State<Node01PhonemeScreen>
   int _currentStep = 1;        // التفاعل الحالي (1, 2, 3)
   int _xpEarned = 0;
   String? _selectedAnswer;
-  bool? _isAnswerCorrect;
   bool _isProcessing = false;
   int _correctCount = 0;
   final _stopwatch = Stopwatch();
@@ -97,7 +96,6 @@ class _Node01PhonemeScreenState extends State<Node01PhonemeScreen>
 
     setState(() {
       _selectedAnswer = answer;
-      _isAnswerCorrect = isCorrect;
       _isProcessing = true;
     });
 
@@ -125,11 +123,15 @@ class _Node01PhonemeScreenState extends State<Node01PhonemeScreen>
       setState(() {
         _currentStep++;
         _selectedAnswer = null;
-        _isAnswerCorrect = null;
         _isProcessing = false;
       });
     } else {
       // انتهت الجلسة
+      final mastery = context.read<MasteryService>();
+      if (_correctCount == 3) {
+        mastery.unlockBadge('perfect_session');
+      }
+      mastery.addXp(_xpEarned);
       _navigateToComplete();
     }
   }
@@ -201,10 +203,10 @@ class _Node01PhonemeScreenState extends State<Node01PhonemeScreen>
             width: 72,
             height: 72,
             decoration: BoxDecoration(
-              color: AdventureSkin.primary.withOpacity(0.15),
+              color: AdventureSkin.primary.withValues(alpha: 0.15),
               shape: BoxShape.circle,
               border: Border.all(
-                  color: AdventureSkin.primary.withOpacity(0.4), width: 2),
+                  color: AdventureSkin.primary.withValues(alpha: 0.4), width: 2),
             ),
             child: const Icon(Icons.volume_up_rounded,
                 color: AdventureSkin.primary, size: 36),
@@ -225,10 +227,10 @@ class _Node01PhonemeScreenState extends State<Node01PhonemeScreen>
               padding:
                   const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               decoration: BoxDecoration(
-                color: AdventureSkin.primary.withOpacity(0.1),
+                color: AdventureSkin.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                    color: AdventureSkin.primary.withOpacity(0.3)),
+                    color: AdventureSkin.primary.withValues(alpha: 0.3)),
               ),
               child: Text(
                 question.soundLabel!,
@@ -284,7 +286,7 @@ class _Node01PhonemeScreenState extends State<Node01PhonemeScreen>
       textColor = AdventureSkin.letterCardWrong;
     } else {
       decoration = AdventureSkin.letterCardDecoration.copyWith(
-        color: AdventureSkin.letterCard.withOpacity(0.4),
+        color: AdventureSkin.letterCard.withValues(alpha: 0.4),
       );
     }
 

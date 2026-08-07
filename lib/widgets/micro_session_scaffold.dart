@@ -69,7 +69,7 @@ class MicroSessionScaffold extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(Icons.arrow_back_ios_new,
@@ -96,10 +96,10 @@ class MicroSessionScaffold extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AdventureSkin.accent.withOpacity(0.15),
+              color: AdventureSkin.accent.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                  color: AdventureSkin.accent.withOpacity(0.4), width: 1),
+                  color: AdventureSkin.accent.withValues(alpha: 0.4), width: 1),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -127,7 +127,7 @@ class MicroSessionScaffold extends StatelessWidget {
           Text(
             '$currentStep / $totalSteps',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withValues(alpha: 0.6),
               fontSize: 12,
               fontFamily: AdventureSkin.arabicFont,
             ),
@@ -137,7 +137,7 @@ class MicroSessionScaffold extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
               value: currentStep / totalSteps,
-              backgroundColor: Colors.white.withOpacity(0.1),
+              backgroundColor: Colors.white.withValues(alpha: 0.1),
               valueColor: const AlwaysStoppedAnimation<Color>(
                   AdventureSkin.primary),
               minHeight: 8,

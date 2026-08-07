@@ -112,6 +112,11 @@ class _Node03VowelFathaScreenState extends State<Node03VowelFathaScreen>
         _isProcessing = false;
       });
     } else {
+      final mastery = context.read<MasteryService>();
+      if (_correctCount == 3) {
+        mastery.unlockBadge('perfect_session');
+      }
+      mastery.addXp(_xpEarned);
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (_) => SessionCompleteScreen(
           skillId: widget.node.id,
